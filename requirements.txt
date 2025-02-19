@@ -1,0 +1,6 @@
+flask
+pandas
+numpy
+requests
+gunicorn  # For production deployment (optional)
+waitress  # For Windows deployment (optional)
