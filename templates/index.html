@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Market Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="container mx-auto p-6 text-center">
+        <h1 class="text-3xl font-bold text-yellow-400 mb-4">📊 Bitcoin Market Status</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Live Price -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">💰 Live Price</h2>
+                <p id="price" class="text-2xl font-bold text-green-400 mt-2">$0.00</p>
+            </div>
+
+            <!-- EMA 9 -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">📈 EMA 9</h2>
+                <p id="ema9" class="text-lg mt-2">Loading...</p>
+            </div>
+
+            <!-- EMA 21 -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">📉 EMA 21</h2>
+                <p id="ema21" class="text-lg mt-2">Loading...</p>
+            </div>
+
+            <!-- RSI -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">📊 RSI</h2>
+                <p id="rsi" class="text-lg mt-2">Loading...</p>
+            </div>
+
+            <!-- MACD -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">📊 MACD</h2>
+                <p id="macd" class="text-lg mt-2">Loading...</p>
+            </div>
+
+            <!-- Signal Line -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">🚀 Signal Line</h2>
+                <p id="signal" class="text-lg mt-2">Loading...</p>
+            </div>
+
+            <!-- Market Trend -->
+            <div class="col-span-full bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold">📢 Market Trend</h2>
+                <p id="trend" class="text-2xl font-bold mt-2">Loading...</p>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="col-span-full text-sm text-gray-400">
+                <p id="timestamp">Updates Every 10 Second</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        async function fetchLivePrice() {
+            try {
+                const response = await fetch('/api/price');
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById("price").innerText = "Error fetching price!";
+                } else {
+                    document.getElementById("price").innerText = `$${data.live_price.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error("Error fetching live price:", error);
+            }
+        }
+
+        async function fetchTradeData() {
+            try {
+                const response = await fetch('/api/trade_data');
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById("trend").innerText = "Error fetching data!";
+                } else {
+                    document.getElementById("ema9").innerText = data.ema_9.toFixed(2);
+                    document.getElementById("ema21").innerText = data.ema_21.toFixed(2);
+                    document.getElementById("rsi").innerText = data.rsi.toFixed(2);
+                    document.getElementById("macd").innerText = data.macd.toFixed(2);
+                    document.getElementById("signal").innerText = data.signal.toFixed(2);
+                    document.getElementById("timestamp").innerText = "Last Updated: " + data.timestamp;
+
+                    let trendElement = document.getElementById("trend");
+                    if (data.live_price > data.ema_9) {
+                        trendElement.innerText = "🚀 Bullish Trend";
+                        trendElement.className = "text-2xl font-bold text-green-400 mt-2";
+                    } else {
+                        trendElement.innerText = "🔻 Bearish Trend";
+                        trendElement.className = "text-2xl font-bold text-red-400 mt-2";
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching trade data:", error);
+            }
+        }
+
+        function updateData() {
+            fetchLivePrice();
+            fetchTradeData();
+        }
+
+        setInterval(updateData, 10000);
+        window.onload = updateData;
+    </script>
+
+</body>
+</html>
